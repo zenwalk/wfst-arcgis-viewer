@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="false" useMultiPlatformConfig="false" version="1">
+  <includeClasses>
+    <classEntry path="com.esri.wfs.components.WFSTAttributeEditor"/>
+    <classEntry path="com.esri.wfs.components.WFSTFeatureControl"/>
+    <classEntry path="com.esri.wfs.components.WFSTLazyLockAttributeEditor"/>
+    <classEntry path="com.esri.wfs.components.WFSTLazyLockFeatureControl"/>
+    <classEntry path="com.esri.wfs.components.WFSTSnappingControl"/>
+    <classEntry path="com.esri.wfs.events.WFSEvent"/>
+    <classEntry path="com.esri.wfs.events.WFSQueryEvent"/>
+    <classEntry path="com.esri.wfs.events.WFSTEvent"/>
+    <classEntry path="com.esri.wfs.layers.WFSLayer"/>
+    <classEntry path="com.esri.wfs.layers.WFSTLayer"/>
+    <classEntry path="com.esri.wfs.layers.WFSTLazyLockLayer"/>
+    <classEntry path="com.esri.wfs.tasks.WFSQuery"/>
+    <classEntry path="com.esri.wfs.tasks.WFSQueryTask"/>
+    <classEntry path="com.esri.wfs.utils.LayerSnapContext"/>
+    <classEntry path="com.esri.wfs.utils.SnapContext"/>
+    <classEntry path="com.esri.wfs.utils.SnapManager"/>
+    <classEntry path="com.esri.wfs.utils.SnapMode"/>
+    <classEntry path="com.esri.wfs.utils.SnapUtil"/>
+    <classEntry path="com.esri.wfs.utils.WFSUtil"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests>
+    <namespaceManifestEntry manifest="manifest.xml" namespace="http://www.esri.com/2008/wfst"/>
+  </namespaceManifests>
+</flexLibProperties>
