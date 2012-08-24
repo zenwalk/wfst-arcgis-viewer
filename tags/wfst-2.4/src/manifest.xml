@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<componentPackage>
+<!--	<component id="WFSTAttributeEditor" class="com.esri.wfs.components.WFSTAttributeEditor" />-->
+<!--	<component id="WFSTFeatureControl" class="com.esri.wfs.components.WFSTFeatureControl" />-->
+<!--	<component id="WFSTLazyLockAttributeEditor"-->
+<!--		class="com.esri.wfs.components.WFSTLazyLockAttributeEditor" />-->
+<!--	<component id="WFSTLazyLockFeatureControl"-->
+<!--		class="com.esri.wfs.components.WFSTLazyLockFeatureControl" />-->
+<!--	<component id="WFSTSnappingControl" class="com.esri.wfs.components.WFSTSnappingControl" />-->
+	<component id="WFSEvent" class="com.esri.wfs.events.WFSEvent" />
+	<component id="WFSQueryEvent" class="com.esri.wfs.events.WFSQueryEvent" />
+	<component id="WFSTEvent" class="com.esri.wfs.events.WFSTEvent" />
+	<component id="WFSLayer" class="com.esri.wfs.layers.WFSLayer" />
+	<component id="WFSTLayer" class="com.esri.wfs.layers.WFSTLayer" />
+	<component id="WFSTLazyLockLayer" class="com.esri.wfs.layers.WFSTLazyLockLayer" />
+	<component id="WFSQuery" class="com.esri.wfs.tasks.WFSQuery" />
+	<component id="WFSQueryTask" class="com.esri.wfs.tasks.WFSQueryTask" />
+	<component id="LayerSnapContext" class="com.esri.wfs.utils.LayerSnapContext" />
+	<component id="SnapContext" class="com.esri.wfs.utils.SnapContext" />
+	<component id="SnapManager" class="com.esri.wfs.utils.SnapManager" />
+	<component id="SnapMode" class="com.esri.wfs.utils.SnapMode" />
+	<component id="SnapUtil" class="com.esri.wfs.utils.SnapUtil" />
+	<component id="WFSUtil" class="com.esri.wfs.utils.WFSUtil" />
+	<component id="WFSRenderer" class="com.esri.wfs.renderers.WFSRenderer" />
+	<component id="WFSTLazyLockRenderer" class="com.esri.wfs.renderers.WFSTLazyLockRenderer" />
+</componentPackage>
