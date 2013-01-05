@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*****************************************************************************************
+*Upgrade Version 3.0 : Raffaello Bertini                                                 *
+*                                                                                        *
+*                                                                                        *
+*Copyright 2012 Marco Vassura - CIRI ICT                                                 *
+*This work is licensed under the                                                         *
+*Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.             *
+*Based on a work from ESRI dev summer 2009 available at arcscripts.esri.com              *
+*Permissions beyond the scope of this license may be available at marco.vassura@unibo.it *
+*To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ *
+*or send a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View,      *
+*California, 94041, USA.                                                                 *
+******************************************************************************************/
+-->
+<viewer:BaseWidget xmlns:fx="http://ns.adobe.com/mxml/2009"
+                   xmlns:s="library://ns.adobe.com/flex/spark"
+                   xmlns:mx="library://ns.adobe.com/flex/mx"
+                   xmlns:viewer ="com.esri.viewer.*"
+				   xmlns:esri			="http://www.esri.com/2008/ags" 
+				   xmlns:toccomp		="com.esri.viewer.components.toc.*" 			
+                    
+				   xmlns:components="com.esri.wfs.components.*"
+				   widgetConfigLoaded="init()">
+
+	
+    <fx:Script>
+   
+	<![CDATA[
+		import com.esri.ags.Graphic;
+		import com.esri.ags.Map;
+		import com.esri.ags.SpatialReference;
+		import com.esri.ags.events.MapEvent;
+		import com.esri.ags.geometry.Extent;
+		import com.esri.ags.layers.*;
+		import com.esri.ags.symbols.SimpleMarkerSymbol;
+		import com.esri.viewer.*;
+		import com.esri.viewer.AppEvent;
+		import com.esri.viewer.IBaseWidget;
+		import com.esri.viewer.ViewerContainer;
+		import com.esri.viewer.components.toc.utils.MapUtil;
+		import com.esri.wfs.WFSComm;
+		import com.esri.wfs.events.WFSEvent;
+		import com.esri.wfs.events.WFSTEvent;
+		import com.esri.wfs.layers.*;
+		import com.esri.wfs.properties.WFSLayerProperties;
+		import com.esri.wfs.properties.WFSLayerPropertiesService;
+		import com.esri.wfs.properties.WFSLayerPropertiesServiceFeature;
+		
+		import flash.sampler.NewObjectSample;
+		
+		import mx.collections.ArrayCollection;
+		import mx.collections.ArrayList;
+		import mx.controls.Alert;
+		import mx.rpc.AsyncResponder;
+		import mx.rpc.AsyncToken;
+		import mx.rpc.events.FaultEvent;
+		import mx.rpc.http.HTTPService;
+		
+		import widgets.Bookmark.Bookmark;
+	
+		[Bindable]
+		private var m_includeLayers :ArrayCollection = new ArrayCollection();
+		[Bindable]
+		private var loaded_layers:int;
+		
+		/*** Lettura da file configXML ***/
+
+		/*
+		[Bindable]
+		private var selectionLabel:String;
+		[Bindable]
+		private var attributesLabel:String;
+		[Bindable]
+		private var consoleLabel:String;			
+		[Bindable]
+		private var attrGlobalLabel:String;
+*/
+		//**********************************
+		
+		private var m_wfsFeatureTitles :ArrayCollection = new ArrayCollection();	
+		private var m_wfsFeatureNames :ArrayCollection = new ArrayCollection();	
+			
+		//extent dei layers per zoomTo
+		private var m_wfsFeatureExtents :ArrayCollection = new ArrayCollection();
+		
+		
+		/*
+		private var m_wfsExcludedFields :ArrayCollection = new ArrayCollection([
+			"aa_add",
+			"gid",			
+			"id",
+			"dip",
+			"ind",
+		//	"prv",			
+		//	"n_reg_imp",			
+			"n_rea",			
+			"ul_sede",			
+			"n_albo_aa",			
+		//	"sez_reg_im",			
+			"strad",			
+		//	"capitale",			
+			"codici_att",			
+			"valuta_cap",			
+			"stato_impr",			
+			"lat",			
+			"lon",			
+			"idarco",			
+			"idnodo",			
+			"catateco_p",			
+			"catateco_s",			
+			"the_geom"]);
+		*/
+		//private var m_wfsExcludedFields :ArrayCollection = new ArrayCollection([]);
+		
+		[Bindable]
+		private var mapx:Map = new Map;		
+		private const ICON_URL:String = "assets/images/";
+		//private const ICON_NGC:String = "assets/images/";
+	
+		private var properties:WFSLayerProperties;
+		private var widget_closed:Boolean;
+		
+		private function init(): void
+		{
+			if (configXML)
+			{
+				mapx = map;
+				/**da creare un array per i layer multipli... **/
+				properties = WFSLayerProperties.WFSLayerReadProperties(configXML);
+				loaded_layers=0;
+				//mutliple services capabilities
+				for(var i:int=0; i<properties.services.length; i++)
+					getCapabilities(i);
+			}
+			/*
+			wTemplate.addTitlebarButton(ICON_URL + "i_layers.png", selectionLabel, showStateSelection);
+			wTemplate.addTitlebarButton(ICON_URL + "edit_attributes.png", attributesLabel, showStateAttributes);
+			wTemplate.addTitlebarButton(ICON_URL + "i_edit.png", consoleLabel, showStateConsole);
+			wTemplate.addTitlebarButton(ICON_URL + "i_table.png", attrGlobalLabel, showStateAttrGlobal);
+			*/
+			
+			//wTemplate.addTitlebarButton(ICON_URL + "i_layers.png", properties.selectionLabel, showStateSelection);
+			wTemplate.addTitlebarButton(ICON_URL + "edit_attributes.png", properties.attributesLabel, showStateAttributes);
+			//wTemplate.addTitlebarButton(ICON_URL + "i_edit.png", properties.consoleLabel, showStateConsole);
+			wTemplate.addTitlebarButton(ICON_URL + "i_table.png", properties.attrGlobalLabel, showStateAttrGlobal);
+
+		}
+		
+		private function getCapabilities(service_index:int) :void
+		{	
+			var service :HTTPService = new HTTPService();
+			service.contentType = "application/xml";
+			service.resultFormat = "e4x";
+			service.requestTimeout = 60;
+			//service.url = m_wfsURL;
+			var serv:WFSLayerPropertiesService = properties.services[service_index];
+			service.url = serv.url
+			//service.useProxy = false;
+			
+			//verificare che sia corretto
+			service.useProxy = serv.useproxy;
+			if(service.useProxy==true)
+				service.rootURL = serv.proxyurl;
+			
+			var capabilities :XML = WFSComm.GetCapabilitiesQuery();
+			
+			//capabilities.setNamespace(m_wfsNamespace);
+			var token : AsyncToken = service.send( capabilities );
+			//Alert.show("getcapabilities...");
+			token.addResponder( new AsyncResponder(
+				function onSuccess( result :Object, token :Object = null ) :void
+				{
+					var wfsNS :Namespace = WFSComm.WFS;
+					var xml :XML = result.result as XML;
+
+					for each( var featureXML :XML in xml..wfsNS::FeatureType )
+					{
+						var m_wkt: String = featureXML.wfsNS::SRS.toString();
+						var m_wkid:Number= new Number(m_wkt.substring(5));
+						var spatialref:SpatialReference = new SpatialReference(m_wkid);
+						var title :String = featureXML.wfsNS::Title;
+						var name :String = featureXML.wfsNS::Name;
+						var extent:Extent = new Extent(featureXML.wfsNS::LatLongBoundingBox.@minx,featureXML.wfsNS::LatLongBoundingBox.@miny,featureXML.wfsNS::LatLongBoundingBox.@maxx,featureXML.wfsNS::LatLongBoundingBox.@maxy,spatialref);
+						//if( serv.defaultwkid == null )
+						serv.defaultwkid = featureXML.wfsNS::DefaultSRS;
+
+						m_wfsFeatureTitles.addItem( title );
+						if(name.search(":")>=0)	
+							m_wfsFeatureNames.addItem( name.substring(name.search(":")+1) );
+						else 
+							m_wfsFeatureNames.addItem( name );
+						m_wfsFeatureExtents.addItem(extent);
+						//Alert.show("each feature...");      		
+					}
+					//Alert.show("calling addWFSLayers");
+					//addWFSLayers();
+				
+					addWFSLayers(serv);
+				},
+				onFault
+				,
+				this
+			));
+		}
+		
+		private function onFault( event :FaultEvent, token :Object = null ) :void
+		{
+			// hide the loader and committer
+			Alert.show(event.fault.errorID.toString()+"-"+event.fault.faultString);
+			
+			loadingDone();
+			transactionDone();
+		}
+		
+		private function addWFSLayers(serv:WFSLayerPropertiesService) :void
+		{
+			var layerNumber :int = 0;
+			//var SearchWFS:RegExp = new RegExp(filter, "i");
+			var feature_tot:int = m_wfsFeatureNames.length;
+			
+			for each (var feature:WFSLayerPropertiesServiceFeature in serv.features)
+			{
+				for (layerNumber=0; layerNumber < feature_tot; layerNumber++)
+				{
+					var featureTitle :String = m_wfsFeatureTitles[layerNumber];
+					//if(featureTitle.search(SearchWFS)!=-1)
+					if(featureTitle == feature.featureTitle)
+					{
+						var wfsLayer :WFSTLayer = new WFSTLayer( serv.url);
+						//wfsLayer.name = m_wfsFeatureTitles[layerNumber];
+						wfsLayer.name = feature.name;
+						//wfsLayer.label = m_wfsFeatureTitles[layerNumber];
+						wfsLayer.label = wfsLayer.name;
+						wfsLayer.featureName = m_wfsFeatureNames[layerNumber];
+						wfsLayer.featureNamespace = serv.ns;
+						if(feature.wkid=="")
+						{
+							//tried with geoserver EPSG:4326... 
+							
+							wfsLayer.featureSRS = serv.defaultwkid;
+							var srs:Array = serv.defaultwkid.split(':');
+							var str:String = srs[srs.length-2];
+							if((str=="EPSG"))
+								wfsLayer.featureSRS = str +":"+ srs[srs.length-1];
+						}
+						else
+							wfsLayer.featureSRS = feature.wkid;
+						wfsLayer.maxFeatures = feature.maxfeature; // this limits features returned by a WFS query to m_wfsMaxFeatures
+						wfsLayer.swapCoordinates = feature.SwapCoordinates;
+						//wfsLayer.visible = false;
+						wfsLayer.visible = feature.visible;
+						if(!wfsLayer.visible)
+							loaded_layers++;
+						wfsLayer.shapeField = feature.shapefield;
+						wfsLayer.initialExtent = m_wfsFeatureExtents[layerNumber];
+						wfsLayer.featureLimit = feature.featurelimit;
+						wfsLayer.excludeFields = feature.ExcludedFields;
+						
+						m_includeLayers.addItem( wfsLayer );
+						addLayerListeners( wfsLayer );
+						mapx.addLayer( wfsLayer );
+					}
+				}
+			}
+		}	
+
+		private function addLayerListeners( layer :WFSTLayer ) :void
+		{
+			layer.addEventListener( WFSEvent.LOADING_STARTED, loadingStarted );
+			layer.addEventListener( WFSEvent.LOADING_COMPLETE, loadingDone );
+			layer.addEventListener( WFSEvent.LOADING_FAILED, loadingDone );
+			layer.addEventListener( WFSTEvent.TRANSACTION_STARTED, transactionStarted );
+			layer.addEventListener( WFSTEvent.TRANSACTION_COMMITTED, transactionDone );
+			layer.addEventListener( WFSTEvent.TRANSACTION_FAILED, transactionDone );
+			layer.addEventListener( FaultEvent.FAULT, onFault );
+		}
+		
+		//check this one...
+		private function tocLabels( layer :Layer ) :String
+		{
+			if( layer is WFSLayer )
+			{
+				var transLayer :WFSLayer = layer as WFSLayer;
+				return ( transLayer.label != null && transLayer.label != "" ) ? transLayer.label : transLayer.name;
+			}
+			
+			return com.esri.viewer.components.toc.utils.MapUtil.labelLayer( layer );
+		}
+		
+		private function transactionStarted( event :WFSTEvent = null ) :void
+		{
+			committer.visible = true;
+		}		
+		
+		private function transactionDone( event :WFSTEvent = null ) :void
+		{
+			committer.visible = false;
+		}
+		
+		private function loadingStarted( event :WFSEvent = null ) :void
+		{
+			loader.visible = true;
+		}
+		
+		private function loadingDone( event :WFSEvent = null ) :void
+		{
+			loaded_layers++;
+			if(loaded_layers == m_includeLayers.length)
+			{
+				loader.visible = false;
+				loaded_layers--;
+			}
+		}	
+		
+		private function showStateAttributes():void
+		{
+			AppEvent.dispatch(AppEvent.TOC_HIDDEN);//nasconde il menu dei layers se aperto
+			viewStack.selectedIndex = 0;//era WidgetEffects.flipWidget(this, viewStack, "selectedIndex", 2, 400);
+			//sara' this.currentState="Attributes";
+		}
+		
+		
+		private function showStateSelection():void
+		{
+			AppEvent.dispatch(AppEvent.TOC_HIDDEN);//nasconde il menu dei layers se aperto	
+			viewStack.selectedIndex = 0;
+			//this.currentState="Selection";
+		}	
+		
+		private function showStateConsole():void
+		{
+			AppEvent.dispatch(AppEvent.TOC_HIDDEN);//nasconde il menu dei layers se aperto
+			viewStack.selectedIndex = 1;
+			//this.currentState="Console";
+		}
+
+		private function showStateAttrGlobal():void
+		{
+			AppEvent.dispatch(AppEvent.TOC_HIDDEN);//nasconde il menu dei layers se aperto
+			viewStack.selectedIndex = 1;
+			//this.currentState="Console";
+		}
+		
+		private function widgetClosedHandler(event:Event):void
+		{
+			AppEvent.dispatch(AppEvent.TOC_HIDDEN);//nasconde il menu dei layers se aperto
+			widget_closed=true;
+			for each (var graphicsLayer: WFSLayer in m_includeLayers)
+				graphicsLayer.visible = false;
+		}	
+		
+		private function widgetMinimizedHandler(event:Event):void
+		{
+			//this.widgetClosedHandler(event);
+			AppEvent.dispatch(AppEvent.TOC_HIDDEN);//nasconde il menu dei layers se aperto
+			//loader.visible = false;
+		}
+		
+		private function widgetOpenedHandler(event:Event):void
+		{
+			if(widget_closed)
+			{
+				var so:Object = editorGlobal.wfsLayerComboBox.selectedItem;
+				var lay:WFSTLayer;
+				var lay_name:String;
+				if(so)
+				{
+					lay = so.Layer as WFSTLayer;
+					lay_name = lay.name;
+				}
+				else
+					lay_name="";
+				
+				for each (var graphicsLayer: WFSTLayer in m_includeLayers)
+				{
+					//set value to the config file...
+					var endserv:Boolean = false;
+					for each(var serv:WFSLayerPropertiesService in properties.services)
+					{
+						for each (var feat:WFSLayerPropertiesServiceFeature in serv.features)
+						{
+							if(feat.name==graphicsLayer.name)
+							{
+								graphicsLayer.visible=feat.visible;
+								endserv=true;
+								if(lay_name==graphicsLayer.name)
+										editorGlobal.wfsLayerVisible.selected=lay.visible=graphicsLayer.visible;
+								break;
+							}
+						}
+						if(endserv)
+							break;
+					}
+					graphicsLayer.Refresh();
+
+				
+				}
+			}
+			widget_closed=false;
+		}
+		
+		protected function tocBox_clickHandler(event:MouseEvent):void
+		{
+			AppEvent.dispatch(AppEvent.TOC_HIDDEN); // always hide the toc layer menu
+		}
+		]]>
+		
+		</fx:Script>
+		
+		<viewer:WidgetTemplate id="wTemplate"	
+							closed="widgetClosedHandler(event)" 
+						open="widgetOpenedHandler(event)"
+						minimized="widgetMinimizedHandler(event)"
+						
+						width="600">
+			<mx:ViewStack id="viewStack" width="100%" height="100%" creationPolicy="all">
+				<mx:VBox  height="100%" width="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+					<components:WFSTAttributeEditor					id="editor"
+																	wfsLayer="{editorGlobal.wfsLayer}"
+														  			verticalAlign="bottom"  width="100%" 
+														   			height="100%"
+														  			paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="2"
+												   					/>
+			
+				</mx:VBox>	
+				<mx:VBox  height="100%" width="100%" horizontalScrollPolicy="on" verticalScrollPolicy="off">
+					<components:WFSTAttributeEditorGlobal  		id="editorGlobal"
+																map="{mapx}"
+																showWFSLayerChoices="{m_includeLayers.length>1}"
+																verticalAlign="middle"  horizontalAlign="center" 
+																paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="2"
+																/>
+				</mx:VBox>	
+			</mx:ViewStack>
+			<!-- Status indicator for committing -->
+			<mx:Box id="loader" visible="false" x="{this.width / 2 - loader.width / 2}" y="{this.height / 2 - loader.height / 2}" styleName="loader" direction="horizontal">
+				<mx:Image source="assets/images/loader.swf" autoLoad="true"/>
+				<mx:Label text="Loading"/>
+			</mx:Box>
+			<mx:Box id="committer" visible="false" x="{this.width / 2 - loader.width / 2}" y="{this.height / 2 - loader.height / 2}" styleName="loader" direction="horizontal">
+				<mx:Image source="assets/images/loader.swf" autoLoad="true"/>
+				<mx:Label text="Committing Changes"/>
+			</mx:Box>
+		</viewer:WidgetTemplate>
+</viewer:BaseWidget>
+
+

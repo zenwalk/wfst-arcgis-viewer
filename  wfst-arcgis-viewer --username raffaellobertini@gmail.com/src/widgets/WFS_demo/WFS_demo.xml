@@ -1,0 +1,53 @@
+<!--
+Example Widget config
+-->
+<configuration>
+    <globals>
+    	<attributeslabel>Details</attributeslabel>
+    	<attrgloballabel>List</attrgloballabel>
+    	<consolelabel>Modify</consolelabel>
+    	<selectionlabel>Layers</selectionlabel>
+	</globals>
+    <service>
+		<!-- insert the url of your wfs service here -->
+		<URL>http://localhost:8080/geoserver/wfs</URL>
+       
+		<!-- insert the namespace of your wfs service here, this is for geoserver -->
+		<namespace>http://www.opengeospatial.net/cite</namespace>
+		<!-- max feature global non va qui. -->
+		
+		<!--proxy settings-->
+		<proxyurl></proxyurl>
+
+		<feature>
+			<wkid>EPSG:3857</wkid>
+			<!-- insert a value greater than 0 if you want to limit the number of features to increase performances  -->
+			<featurelimit>0</featurelimit>
+			<!-- 
+				all features listed in this tag will be show, separate layer with semicolon 
+				ex: <featureTitleFilter> feature1; feature2 </featureTitleFilter>
+			-->
+			<name>WFS Routing Demo</name>
+			<featureTitle>customerssalesex</featureTitle>
+			<!-- the field containing geometric information -->
+			<shapefield>geom_way</shapefield>
+			<!--swap xy coord to yx-->
+			<SwapCoordinates>false</SwapCoordinates>
+			<visible>false</visible>
+			<maxfeatures>0</maxfeatures>
+		</feature>
+		<feature>
+			<name>Customers Location</name>	
+			<featureTitle>customerssalesexlocation</featureTitle>
+			<shapefield>the_geom</shapefield>
+		</feature>
+		<feature>
+			<name>emily_route</name>	
+			<featureTitle>emily_route</featureTitle>
+			<shapefield>st_transform</shapefield>
+			<!-- not implemented -->
+			<exludedfields>id</exludedfields>
+		</feature>
+	</service>
+
+</configuration>
