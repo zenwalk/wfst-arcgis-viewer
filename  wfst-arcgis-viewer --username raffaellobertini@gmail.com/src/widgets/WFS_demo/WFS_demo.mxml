@@ -174,7 +174,7 @@
 				{
 					var wfsNS :Namespace = WFSComm.WFS;
 					var xml :XML = result.result as XML;
-
+					
 					for each( var featureXML :XML in xml..wfsNS::FeatureType )
 					{
 						var m_wkt: String = featureXML.wfsNS::SRS.toString();
@@ -185,12 +185,23 @@
 						var extent:Extent = new Extent(featureXML.wfsNS::LatLongBoundingBox.@minx,featureXML.wfsNS::LatLongBoundingBox.@miny,featureXML.wfsNS::LatLongBoundingBox.@maxx,featureXML.wfsNS::LatLongBoundingBox.@maxy,spatialref);
 						//if( serv.defaultwkid == null )
 						serv.defaultwkid = featureXML.wfsNS::DefaultSRS;
-
-						m_wfsFeatureTitles.addItem( title );
-						if(name.search(":")>=0)	
-							m_wfsFeatureNames.addItem( name.substring(name.search(":")+1) );
+						var n_id:int = name.search(":");
+						
+						if(n_id>=0)
+						{
+							var prefixx:XML = featureXML.wfsNS::Name;
+							var ns:Namespace = prefixx.namespace(name.substr(0,n_id));
+							
+							if(ns.uri == serv.ns)
+								m_wfsFeatureNames.addItem( name.substr(n_id + 1));
+							else
+								continue;
+						}
 						else 
 							m_wfsFeatureNames.addItem( name );
+
+						m_wfsFeatureTitles.addItem( title );
+						
 						m_wfsFeatureExtents.addItem(extent);
 						//Alert.show("each feature...");      		
 					}
@@ -225,6 +236,7 @@
 				for (layerNumber=0; layerNumber < feature_tot; layerNumber++)
 				{
 					var featureTitle :String = m_wfsFeatureTitles[layerNumber];
+					
 					//if(featureTitle.search(SearchWFS)!=-1)
 					if(featureTitle == feature.featureTitle)
 					{
