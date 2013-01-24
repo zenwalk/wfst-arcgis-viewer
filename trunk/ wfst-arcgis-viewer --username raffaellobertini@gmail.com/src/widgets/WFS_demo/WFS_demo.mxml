@@ -133,6 +133,7 @@
 				//mutliple services capabilities
 				for(var i:int=0; i<properties.services.length; i++)
 					getCapabilities(i);
+				
 			}
 			/*
 			wTemplate.addTitlebarButton(ICON_URL + "i_layers.png", selectionLabel, showStateSelection);
@@ -263,9 +264,13 @@
 						wfsLayer.swapCoordinates = feature.SwapCoordinates;
 						//wfsLayer.visible = false;
 						wfsLayer.visible = feature.visible;
-						if(!wfsLayer.visible)
+						//if(!wfsLayer.visible)
 							loaded_layers++;
 						wfsLayer.shapeField = feature.shapefield;
+						wfsLayer.SetPointShape(feature.pointshape);
+						wfsLayer.SetAutoColor(feature.autocolor);
+						
+						
 						wfsLayer.initialExtent = m_wfsFeatureExtents[layerNumber];
 						wfsLayer.featureLimit = feature.featurelimit;
 						wfsLayer.excludeFields = feature.ExcludedFields;
@@ -313,6 +318,7 @@
 		
 		private function loadingStarted( event :WFSEvent = null ) :void
 		{
+			loaded_layers--;
 			loader.visible = true;
 		}
 		
@@ -320,10 +326,7 @@
 		{
 			loaded_layers++;
 			if(loaded_layers == m_includeLayers.length)
-			{
 				loader.visible = false;
-				loaded_layers--;
-			}
 		}	
 		
 		private function showStateAttributes():void

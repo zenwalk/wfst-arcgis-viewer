@@ -13,6 +13,8 @@ package com.esri.wfs.properties
 		public var ExcludedFields :ArrayCollection;
 		public var maxfeature:int; //rows limit for the query
 		public var visible:Boolean;
+		public var pointshape:String;
+		public var autocolor:String;
 		
 		public function WFSLayerPropertiesServiceFeature()
 		{

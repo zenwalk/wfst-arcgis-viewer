@@ -212,7 +212,7 @@ package com.esri.wfs.layers
 			// set editing flag and state
 			m_editing = true;
 			m_selectedFeature.addEventListener( MouseEvent.MOUSE_DOWN, onEditMouseDown );
-			m_selectedFeature.symbol = editSymbolFunction( m_selectedFeature );
+			m_selectedFeature.symbol = m_renderer.editSymbolFunction( m_selectedFeature );
 			
 			if( m_featureAttributes != null )
 				balanceAttributes(); 
@@ -266,7 +266,7 @@ package com.esri.wfs.layers
 			m_delta = NaN;
 			m_offsetX = NaN;
 			m_offsetY = NaN;
-			m_selectedFeature.symbol = selectSymbolFunction( m_selectedFeature );
+			m_selectedFeature.symbol = m_renderer.selectSymbolFunction( m_selectedFeature );
 			
 			dispatchEvent( new WFSTEvent( WFSTEvent.EDIT_SAVED ) );
 		}
@@ -288,7 +288,7 @@ package com.esri.wfs.layers
 			m_delta = NaN;
 			m_offsetX = NaN;
 			m_offsetY = NaN;
-			m_selectedFeature.symbol = selectSymbolFunction( m_selectedFeature );
+			m_selectedFeature.symbol = m_renderer.selectSymbolFunction( m_selectedFeature );
 			
 			// revert selected feature attributes to what exist in the selected feature
 			m_selectedFeatureAttributes.removeAll();

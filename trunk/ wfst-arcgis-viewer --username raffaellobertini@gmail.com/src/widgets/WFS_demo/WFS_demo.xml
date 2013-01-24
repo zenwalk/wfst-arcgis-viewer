@@ -1,6 +1,3 @@
-<!--
-Example Widget config
--->
 <configuration>
     <globals>
     	<attributeslabel>Details</attributeslabel>
@@ -10,7 +7,7 @@ Example Widget config
 	</globals>
     <service>
 		<!-- insert the url of your wfs service here -->
-		<URL>http://localhost:8080/geoserver/wfs</URL>
+		<URL>http://127.0.0.1:8080/geoserver/wfs</URL>
        
 		<!-- insert the namespace of your wfs service here, this is for geoserver -->
 		<namespace>http://www.opengeospatial.net/cite</namespace>
@@ -19,6 +16,13 @@ Example Widget config
 		<!--proxy settings-->
 		<proxyurl></proxyurl>
 
+<!--		<feature>
+			<wkid>EPSG:3857</wkid>
+			<name>EmilyRoute</name>	
+			<featureTitle>emily_route</featureTitle>
+			<shapefield>geom_way</shapefield>
+		</feature>
+-->
 		<feature>
 			<wkid>EPSG:3857</wkid>
 			<!-- insert a value greater than 0 if you want to limit the number of features to increase performances  -->
@@ -37,17 +41,72 @@ Example Widget config
 			<maxfeatures>0</maxfeatures>
 		</feature>
 		<feature>
+			<wkid>EPSG:3857</wkid>
+			<name>Single Row</name>	
+			<featureTitle>singlerowroute</featureTitle>
+			<shapefield>geom_route</shapefield>
+			<visible>false</visible>
+		</feature>
+		<feature>
+			<wkid>EPSG:3857</wkid>
 			<name>Customers Location</name>	
 			<featureTitle>customerssalesexlocation</featureTitle>
 			<shapefield>the_geom</shapefield>
+			<pointshape>square</pointshape> <!-- possible value: circle, square, triangle, ....-->
+			<autocolor>id</autocolor>  <!-- column name of the feature  -->
+			<visible>false</visible>
 		</feature>
 		<feature>
-			<name>emily_route</name>	
-			<featureTitle>emily_route</featureTitle>
-			<shapefield>st_transform</shapefield>
-			<!-- not implemented -->
-			<exludedfields>id</exludedfields>
+			<wkid>EPSG:3857</wkid>
+			<name>WFS OVerlayGraph</name>	
+			<featureTitle>customerssalesex_cached_overlayed</featureTitle>
+			<shapefield>the_geom</shapefield>
+			<visible>false</visible>
+		</feature>		
+		<feature>
+			<wkid>EPSG:3857</wkid>
+			<name>WFS OVerlayGraph_0</name>	
+			<featureTitle>customerssalesex_cached_overlayed_0</featureTitle>
+			<shapefield>the_geom</shapefield>
+			<visible>false</visible>
+		</feature>		
+		<feature>
+			<wkid>EPSG:3857</wkid>
+			<name>WFS OVerlayGraph WayBack</name>	
+			<featureTitle>customerssalesex_cached_overlayed_wayback</featureTitle>
+			<shapefield>the_geom</shapefield>
+			<visible>false</visible>
 		</feature>
+		<feature>
+			<wkid>EPSG:3857</wkid>
+			<name>WFS VRP Clienti Demo</name>	
+			<featureTitle>clientiloc</featureTitle>
+			<shapefield>the_geom</shapefield>
+			<visible>false</visible>
+		</feature>
+		<feature>
+			<wkid>EPSG:3857</wkid>
+			<name>WFS VRP Demo WayBack</name>	
+			<featureTitle>vrp_demo</featureTitle>
+			<shapefield>geom_way</shapefield>
+			<visible>false</visible>
+		</feature>
+		<feature>
+			<wkid>EPSG:3857</wkid>
+			<name>WFS VRP Demo Overlay WayBack</name>	
+			<featureTitle>vrp_overlay_demo</featureTitle>
+			<shapefield>the_geom</shapefield>
+			<visible>false</visible>
+		</feature>
+		<feature>
+			<wkid>EPSG:3857</wkid>
+			<name>WFS VRP Demo SIngleRow Results</name>	
+			<featureTitle>vrp_results</featureTitle>
+			<shapefield>the_geom</shapefield>
+			<autocolor>vrproutepath_id</autocolor>
+			<visible>false</visible>
+		</feature>
+		
 	</service>
 
 </configuration>
