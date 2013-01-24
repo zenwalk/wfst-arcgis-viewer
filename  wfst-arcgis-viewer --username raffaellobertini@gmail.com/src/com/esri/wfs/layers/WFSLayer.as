@@ -81,6 +81,7 @@ package com.esri.wfs.layers
 		protected var m_featureLimit :int = 0;
 		protected var m_featureIDs :ArrayCollection = new ArrayCollection();
 		
+		
 		/**
 		 * Constructs a new WFSLayer object.
 		 * @param url the URL of the WFS endpoint.

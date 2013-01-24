@@ -196,7 +196,8 @@ package com.esri.wfs.layers
 		protected var m_selectedFeature :Graphic;
 		protected var m_selectedFeatureAttributes :ArrayCollection = new ArrayCollection(); 
 		
-		protected var m_renderer:WFSRenderer; // = new WFSRenderer();		
+		protected var m_renderer:WFSRenderer; // = new WFSRenderer();	
+		
 		
 		// Lock details
 		protected var m_lockID :String;
@@ -225,8 +226,35 @@ package com.esri.wfs.layers
 		protected var m_featureTypes :ArrayCollection = new ArrayCollection();
 		protected var m_geometryType :String;
 		
+		protected var pointshape:String; //used only for render points.
+		
+		public function GetPointShape() : String
+		{
+			return pointshape;
+		}
+		
+		public function  SetPointShape( value:String):void
+		{
+			m_renderer.SetPointShape(value);	
+		}
+		
+		public function SetAutoColor(column_name:String):void
+		{
+			m_renderer.SetAutoColor(column_name);
+		}
+		
+		/*
+		/**
+		 * value = 0 based index
+		 * */
+		//public function SetRenderColor(value : int):void // 0 based index
+		//{
+		//	m_renderer.SetColor(value);
+		//}
+		
 		// Snapping attributes
 		protected var m_snapContext :SnapContext = new SnapContext();
+		
 		
 		// Snapping options
 		[Inspectable(category="Mapping", enumeration="vertex,edge,end,none", defaultValue="none")]
@@ -234,7 +262,6 @@ package com.esri.wfs.layers
 		public function get snapTo() :String
 		{
 			return m_snapContext.snapMode;
-			
 		}
 		
 		/** @private */
@@ -305,64 +332,10 @@ package com.esri.wfs.layers
 			selectedFeatureAttributes.refresh();
 			
 			m_renderer = new WFSRenderer();
+			
+			//m_renderer.ShowDepot(true);
 		}
 		
-		/**
-		 * The symbol function for this layer for selected features. The function should have the following signature:
-		 * public function mySelectSymbolFunction( graphic : Graphic ) : Symbol
-		 * This property can be used as the source for data binding.
-		 */
-		public var selectSymbolFunction :Function = function( graphic :Graphic ) :Symbol
-		{
-			if( graphic != null && graphic.geometry != null )
-			{
-				if( graphic.geometry is MapPoint )
-					return new SimpleMarkerSymbol( "circle", 13, 0x2171b5, 0.75, 0,0,0,new SimpleLineSymbol( "solid", 0x84594, 1, 2 ) );
-
-				if( graphic.geometry is Polygon )
-					return new SimpleFillSymbol( "solid", 0x2171b5, 0.75, new SimpleLineSymbol( "solid", 0x84594, 1, 2 ) );
-
-				if( graphic.geometry is Polyline )
-					return new SimpleLineSymbol( "solid", 0x84594, 1, 3 );
-
-				if( graphic.geometry is Multipoint )
-					return new SimpleMarkerSymbol( "circle", 13, 0x2171b5, 0.75,0,0,0, new SimpleLineSymbol( "solid", 0x84594, 1, 2 ) );
-			}
-			
-			return new SimpleMarkerSymbol( "circle", 13, 0x2171b5, 0.75,0,0,0, new SimpleLineSymbol( "solid", 0x84594, 1, 2 ) );
-		}
-			
-		/**
-		 * The symbol function for this layer for features being edited. The function should have the following signature:
-		 * public function myEditSymbolFunction( graphic : Graphic ) : Symbol
-		 * This property can be used as the source for data binding.
-		 */
-		public var editSymbolFunction :Function = function( graphic :Graphic ) :Symbol
-		{
-		 	if( graphic != null && graphic.geometry != null )
-		 	{
-				if( graphic.geometry is MapPoint )
-					return new SimpleMarkerSymbol( "circle", 13, 0xcb181d, 0.75, 0,0,0,new SimpleLineSymbol( "solid", 0x99000d, 1, 2 ) );
-				
-				if( graphic.geometry is Polygon )
-					return new CompositeSymbol( new ArrayCollection( [
-						new SimpleFillSymbol( "solid", 0xcb181d, 0.75, new SimpleLineSymbol( "solid", 0x99000d, 1, 2 ) ),
-						new SimpleMarkerSymbol( "square", 9, 0xcb181d, 0.75,0,0,0, new SimpleLineSymbol( "solid", 0x99000d, 1, 1 ) )
-					] ) );
-				
-				if( graphic.geometry is Polyline )
-					return new CompositeSymbol( new ArrayCollection( [
-						new SimpleLineSymbol( "solid", 0x99000d, 1, 5 ),
-						new SimpleMarkerSymbol( "square", 9, 0xcb181d, 0.75,0,0,0, new SimpleLineSymbol( "solid", 0x99000d, 1, 1 ) )
-					] ) );
-				
-				if( graphic.geometry is Multipoint )
-					return new SimpleMarkerSymbol( "circle", 13, 0xcb181d, 0.75,0,0,0, new SimpleLineSymbol( "solid", 0x99000d, 1, 2 ) );
-		 	}
-			
-		 	return new SimpleMarkerSymbol( "circle", 13, 0xcb181d, 0.75,0,0,0, new SimpleLineSymbol( "solid", 0x99000d, 1, 2 ) );
-		}
-
 		/**
 		 * The snap function allows a user to override the snapping functionality with their own algorithm.
 		 * The function must have the form:
@@ -423,7 +396,7 @@ package com.esri.wfs.layers
 				m_selectedFeature = m_featureSet.features[i] as Graphic;
 				m_selectedFeature.removeEventListener( MouseEvent.MOUSE_OVER, onMouseOver );
 				m_selectedFeature.removeEventListener( MouseEvent.MOUSE_OUT, onMouseOut );
-				m_selectedFeature.symbol = selectSymbolFunction( m_selectedFeature );
+				m_selectedFeature.symbol = m_renderer.selectSymbolFunction( m_selectedFeature );
 				m_selectedFeatureID = m_selectedFeature.attributes.GML_FEATURE_ID;
 				// add non-excluded feature attributes into the editor
 				m_selectedFeatureAttributes.removeAll();
@@ -505,7 +478,7 @@ package com.esri.wfs.layers
 				}
 			}
 			if( m_selectedFeature != null )
-				m_selectedFeature.symbol = selectSymbolFunction( m_selectedFeature );
+				m_selectedFeature.symbol = m_renderer.selectSymbolFunction( m_selectedFeature );
 		}
 		
 		/*async responder for wfsQuery*/
@@ -545,7 +518,7 @@ package com.esri.wfs.layers
 			Refresh();
 			
 			if( m_selectedFeature != null )
-				m_selectedFeature.symbol = selectSymbolFunction( m_selectedFeature );
+				m_selectedFeature.symbol = m_renderer.selectSymbolFunction( m_selectedFeature );
 			// event: loading complete
 			dispatchEvent( new WFSEvent( WFSEvent.LOADING_COMPLETE ) );
 		}
@@ -626,7 +599,7 @@ package com.esri.wfs.layers
 			// set editing flag and state
 			m_editing = true;
 			m_selectedFeature.addEventListener( MouseEvent.MOUSE_DOWN, onEditMouseDown );
-			m_selectedFeature.symbol = editSymbolFunction( m_selectedFeature );
+			m_selectedFeature.symbol = m_renderer.editSymbolFunction( m_selectedFeature );
 			
 			// retrieve lock here if this is not a new feature
 			if( !m_new && String( m_selectedFeature.attributes.GML_FEATURE_ID ).search( "NEW_FEATURE_" ) == -1 )
@@ -759,7 +732,7 @@ package com.esri.wfs.layers
 			m_delta = NaN;
 			m_offsetX = NaN;
 			m_offsetY = NaN;
-			m_selectedFeature.symbol = selectSymbolFunction( m_selectedFeature );
+			m_selectedFeature.symbol = m_renderer.selectSymbolFunction( m_selectedFeature );
 			
 			// send the transaction
 			sendTransaction();
@@ -783,7 +756,7 @@ package com.esri.wfs.layers
 			m_delta = NaN;
 			m_offsetX = NaN;
 			m_offsetY = NaN;
-			m_selectedFeature.symbol = selectSymbolFunction( m_selectedFeature );
+			m_selectedFeature.symbol = m_renderer.selectSymbolFunction( m_selectedFeature );
 			
 			// revert selected feature attributes to what exist in the selected feature
 			m_selectedFeatureAttributes.removeAll();
@@ -1263,7 +1236,7 @@ package com.esri.wfs.layers
 			
 			// add the mouse handlers and set the symbol
 			newFeature.addEventListener( MouseEvent.CLICK, onClick );
-			newFeature.symbol = selectSymbolFunction( newFeature );
+			newFeature.symbol = m_renderer.selectSymbolFunction( newFeature );
 
 			// add the feature to the list of graphics
 			add( newFeature );
@@ -1604,7 +1577,7 @@ package com.esri.wfs.layers
 		protected function onMouseOver( event :MouseEvent ) :void
 		{
 			var graphic : Graphic = event.target as Graphic;
-			graphic.symbol = selectSymbolFunction( graphic );
+			graphic.symbol = m_renderer.selectSymbolFunction( graphic );
 		}
 		
 		/**
@@ -1615,8 +1588,10 @@ package com.esri.wfs.layers
 		protected function onMouseOut( event :MouseEvent ) :void
 		{
 			var graphic :Graphic = event.target as Graphic;
+			
 			if( m_selectedFeature == graphic )
-				graphic.symbol = selectSymbolFunction( graphic );
+				graphic.symbol = m_renderer.selectSymbolFunction( graphic );
+				
 			else
 				graphic.symbol = m_renderer.getSymbol ( graphic );
 		}
@@ -1648,7 +1623,7 @@ package com.esri.wfs.layers
 					m_selectedFeature = event.target as Graphic;
 					m_selectedFeature.removeEventListener( MouseEvent.MOUSE_OVER, onMouseOver );
 					m_selectedFeature.removeEventListener( MouseEvent.MOUSE_OUT, onMouseOut );
-					m_selectedFeature.symbol = selectSymbolFunction( m_selectedFeature );
+					m_selectedFeature.symbol = m_renderer.selectSymbolFunction( m_selectedFeature );
 					m_selectedFeatureID = m_selectedFeature.attributes.GML_FEATURE_ID;
 					
 					// add non-excluded feature attributes into the editor

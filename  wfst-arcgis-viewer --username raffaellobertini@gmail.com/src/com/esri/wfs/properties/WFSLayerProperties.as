@@ -67,6 +67,22 @@ package com.esri.wfs.properties
 					f.SwapCoordinates = (swap=="true")?true :false;
 					var vis:String = ff.visible;
 					f.visible = (vis.toLowerCase()=="false")?false:true; //true default.
+					var pshape:String = ff.pointshape;
+					pshape = pshape.toLowerCase();
+					switch (pshape)
+					{
+						case "circle" :
+						case "square" :
+						case "triangle" :
+							f.pointshape = pshape;
+							break;
+						default:
+							f.pointshape = "circle";
+					}
+					var autocolor:String = ff.autocolor;
+					
+					f.autocolor = ff.autocolor;
+					
 					
 					//parsare il sottocampo exludedfields...
 					//TO DO
