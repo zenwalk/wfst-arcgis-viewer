@@ -23,20 +23,19 @@
 			<shapefield>geom_way</shapefield>
 		</feature>
 -->
+
+<!--
 		<feature>
 			<wkid>EPSG:3857</wkid>
 			<!-- insert a value greater than 0 if you want to limit the number of features to increase performances  -->
-			<featurelimit>0</featurelimit>
-			<!-- 
-				all features listed in this tag will be show, separate layer with semicolon 
-				ex: <featureTitleFilter> feature1; feature2 </featureTitleFilter>
-			-->
+<!--			<featurelimit>0</featurelimit>
+			
 			<name>WFS Routing Demo</name>
 			<featureTitle>customerssalesex</featureTitle>
 			<!-- the field containing geometric information -->
-			<shapefield>geom_way</shapefield>
+<!--			<shapefield>geom_way</shapefield>
 			<!--swap xy coord to yx-->
-			<SwapCoordinates>false</SwapCoordinates>
+<!--			<SwapCoordinates>false</SwapCoordinates>
 			<visible>false</visible>
 			<maxfeatures>0</maxfeatures>
 		</feature>
@@ -52,8 +51,8 @@
 			<name>Customers Location</name>	
 			<featureTitle>customerssalesexlocation</featureTitle>
 			<shapefield>the_geom</shapefield>
-			<pointshape>square</pointshape> <!-- possible value: circle, square, triangle, ....-->
-			<autocolor>id</autocolor>  <!-- column name of the feature  -->
+			<pointshape>square</pointshape>
+			<autocolor>id</autocolor>
 			<visible>false</visible>
 		</feature>
 		<feature>
@@ -77,13 +76,35 @@
 			<shapefield>the_geom</shapefield>
 			<visible>false</visible>
 		</feature>
+		-->
 		<feature>
 			<wkid>EPSG:3857</wkid>
 			<name>WFS VRP Clienti Demo</name>	
 			<featureTitle>clientiloc</featureTitle>
 			<shapefield>the_geom</shapefield>
 			<visible>false</visible>
+			<!-- defautl pointshape circle values possible square, (triangle), circle, ....-->
+			<pointshape>circle</pointshape> 
+			<hue>270</hue>
+			<sat>70</sat>
+			<val>85</val>
+			<satb>100</satb>
 		</feature>
+		
+		<feature>
+			<wkid>EPSG:3857</wkid>
+			<name>WFS VRP Magazzino Demo</name>	
+			<featureTitle>magazzinoloc</featureTitle>
+			<shapefield>the_geom</shapefield>
+			<visible>false</visible>
+			<pointshape>square</pointshape>
+			<hue>100</hue>
+			<sat>50</sat>
+			<val>100</val>
+			<satb>100</satb>
+		</feature>
+		
+		<!--
 		<feature>
 			<wkid>EPSG:3857</wkid>
 			<name>WFS VRP Demo WayBack</name>	
@@ -98,6 +119,7 @@
 			<shapefield>the_geom</shapefield>
 			<visible>false</visible>
 		</feature>
+		-->
 		<feature>
 			<wkid>EPSG:3857</wkid>
 			<name>WFS VRP Demo SIngleRow Results</name>	
@@ -105,6 +127,10 @@
 			<shapefield>the_geom</shapefield>
 			<autocolor>vrproutepath_id</autocolor>
 			<visible>false</visible>
+			<!--<hue>30</hue>-->
+			<sat>10</sat>
+			<val>85</val>
+			<satb>100</satb>
 		</feature>
 		
 	</service>

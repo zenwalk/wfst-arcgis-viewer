@@ -83,6 +83,35 @@ package com.esri.wfs.properties
 					
 					f.autocolor = ff.autocolor;
 					
+					var sb:String;
+					sb=ff.hue;
+					if(autocolor=="")
+					{
+						if(sb=="")
+							f.color_hue=-1;
+						else
+							f.color_hue = ff.hue;
+					}
+					else 
+						f.color_hue = -1;
+					
+					sb=ff.sat;
+					if(sb=="")
+						f.color_sat=-1;
+					else
+						f.color_sat = ff.sat;
+					
+					sb=ff.val;
+					if(sb=="")
+						f.color_val=-1;
+					else
+						f.color_val = ff.val;
+					
+					sb = ff.satb;
+					if(sb=="")
+						f.color_satBorder=-1;
+					else
+						f.color_satBorder = ff.satb;
 					
 					//parsare il sottocampo exludedfields...
 					//TO DO
