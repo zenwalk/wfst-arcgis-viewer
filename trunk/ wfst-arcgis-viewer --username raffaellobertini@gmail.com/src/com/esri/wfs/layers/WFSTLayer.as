@@ -243,6 +243,11 @@ package com.esri.wfs.layers
 			m_renderer.SetAutoColor(column_name);
 		}
 		
+		public function SetColorHSV(h:Number, s:Number, v:Number, s2:Number):void
+		{
+				m_renderer.SetColorHSV(h,s,v,s2);
+		}
+		
 		/*
 		/**
 		 * value = 0 based index

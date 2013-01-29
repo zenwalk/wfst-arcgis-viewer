@@ -35,6 +35,11 @@ package com.esri.wfs.renderers
 		
 		private var column_name:String;
 		
+		private var hue:Number;
+		private var sat:Number;
+		private var val:Number;
+		private var satb:Number;
+		
 		private var golden_ratio_conjugate:Number = 0.618033988749895;
 		/*
 		private function value2color( value: int, n: int ): Number
@@ -145,6 +150,7 @@ package com.esri.wfs.renderers
 		}
 		*/
 		
+		
 		public function WFSRenderer( defaultSymbol:Symbol = null )
 		{
 			super();
@@ -153,6 +159,20 @@ package com.esri.wfs.renderers
 			outline_color= 0xfd8d3c;
 			selcolor=0x2171b5;
 			seloutline_color= 0x84594;
+			//fix this... make it withaout calc...
+			//var o:Object = rgb2hsv(color>>16, (color>>8)&0xff, color&0xff);
+			hue= 30; //o.h;
+			//sat=36; //o.s;
+			//val=99; //o.v;
+			
+			//o = rgb2hsv(outline_color>>16, (outline_color>>8)&0xff, outline_color&0xff);
+//			satb = 76; //o.sat;
+			
+			sat=40;
+			val=80;
+			satb=80;
+
+				
 		}
 		
 		public function SetPointShape(value: String) :void
@@ -165,13 +185,37 @@ package com.esri.wfs.renderers
 					pointshape = value;
 					break;
 				default:
-					pointshape = "triangle";
+					pointshape = "circle";
 			}
 		}
 		
 		public function SetAutoColor(_column_name:String):void
 		{
 			column_name = _column_name;
+		}
+		
+		public function SetColorHSV(h:Number, s:Number, v:Number, s2:Number):void
+		{
+			if(h>=0)
+				this.hue = h;
+			if(s>=0)
+				this.sat=s;
+			if(v>=0)
+				this.val=v;
+			if(s2>=0)
+				this.satb=s2;
+			else
+				this.satb=this.sat*2;
+			
+			if((column_name=="")&&
+				((s>=0)||(v>=0)))
+			{
+				color = hsv2rgb(this.hue,this.sat,this.val);
+				selcolor = NegateColor(color);
+				outline_color = hsv2rgb(this.hue,this.satb,this.val);
+				seloutline_color = NegateColor(outline_color);
+			}
+
 		}
 		
 		private function NegateColor(col:Number):Number
@@ -189,7 +233,7 @@ package com.esri.wfs.renderers
 			
 			var hsv:Object = rgb2hsv(col>>16, (col >>8)&0xff, col&0xff);
 			hsv.h = (hsv.h + 180);
-			trace(hsv.h, hsv.s, hsv.v);
+			//trace(hsv.h, hsv.s, hsv.v);
 			
 			//if(hsv.hue > 360)
 			//	hsv.hue -=360;
@@ -202,8 +246,8 @@ package com.esri.wfs.renderers
 			//color = value2color(value,1);
 			//outline_color = value2color(value,2);
 			
-			color = value2color(value,30,49,80);
-			outline_color = value2color(value,30,99,80);
+			color = value2color(value,30,sat,val);
+			outline_color = value2color(value,30,satb,val);
 		}
 		
 		private function GetMapPointSymbol(graphic:Graphic, _color:Number, _outline_color:Number) : Symbol
@@ -233,7 +277,7 @@ package com.esri.wfs.renderers
 				if(graphic.attributes.hasOwnProperty(column_name))
 				{
 					SetColor(graphic.attributes[column_name]);
-					trace("color val:"+graphic.attributes[column_name]);
+					//trace("color val:"+graphic.attributes[column_name]);
 				}
 				
 				if( graphic.geometry is MapPoint )

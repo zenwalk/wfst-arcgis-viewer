@@ -269,7 +269,7 @@
 						wfsLayer.shapeField = feature.shapefield;
 						wfsLayer.SetPointShape(feature.pointshape);
 						wfsLayer.SetAutoColor(feature.autocolor);
-						
+						wfsLayer.SetColorHSV(feature.color_hue, feature.color_sat, feature.color_val, feature.color_satBorder);
 						
 						wfsLayer.initialExtent = m_wfsFeatureExtents[layerNumber];
 						wfsLayer.featureLimit = feature.featurelimit;

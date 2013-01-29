@@ -728,11 +728,11 @@ See use restrictions at http://resources.esri.com/help/9.3/usagerestrictions.htm
 </mx:Script>
 <mx:HBox width="100%" horizontalAlign="left">
 	<mx:Label text="Choose the layer" visible="{showWFSLayerChoices}"/>
-	<mx:ComboBox id="wfsLayerComboBox" labelField="Name" prompt="Select a layer" valueCommit="onLayerChange()" visible="{showWFSLayerChoices}" enabled="{m_canSelectLayer}">
+	<mx:ComboBox id="wfsLayerComboBox" labelField="Name" prompt="Select a layer" valueCommit="onLayerChange()" visible="true" enabled="{m_canSelectLayer}">
 		<mx:ArrayCollection id="wfsLayers" />
 	</mx:ComboBox>
 	<mx:CheckBox id="wfsLayerVisible" label="Visible" click="wfsLayerVisible_clickHandler(event)"
-				 enabled="{m_canSelectLayer}" visible="{showWFSLayerChoices}"/>
+				 enabled="{m_canSelectLayer}" visible="true"/>
 </mx:HBox>
 <mx:DataGrid id="myDataGrid" xmlns:mx="http://www.adobe.com/2006/mxml" editable="false"
 			 horizontalScrollPolicy="auto"
